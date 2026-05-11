@@ -7,6 +7,8 @@
 ├── raw_data文件夹           # 原数据集的10张csv
 ├── processed_data文件夹     # 预处理后的csv存放地
 ├── view_data文件夹          # 取出来csv前几行数据以供浏览
+├── data_process_train_test.py    # 数据预处理代码
+├── feature_select.py    # 数据预处理代码
 ├── data_process.py    # 数据预处理代码
 └── make_csv.py        # 功能性代码
 ```
