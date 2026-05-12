@@ -124,6 +124,7 @@ for col in amt_clip_cols:
 #     numerical 类型：median
 #     categorical 类型：most frequency
 # =========================
+feature_cols = [col for col in df.columns if col not in exclude_cols]
 categorical_cols = df[feature_cols].select_dtypes(
     include=["object", "category", "bool"]
 ).columns.tolist()

@@ -2,7 +2,7 @@ import pandas as pd
 import json
 
 # 读取数据
-df = pd.read_csv("processed_data/application_test_selected_features.csv")  # 也可以换成 pd.read_excel("data.xlsx")
+df = pd.read_csv("processed_data/application_test_processed.csv")  # 也可以换成 pd.read_excel("data.xlsx")
 
 # 自动识别 categorical 和 numeric 特征
 categorical_cols = df.select_dtypes(include=["object", "category"]).columns
@@ -48,8 +48,16 @@ for col in numeric_cols:
         "nan_proportion": float(nan_count / total_rows)
     }
 
+# 统计所有 numeric features 的 nan_count 总和
+total_numeric_nan_count = sum(
+    feature_info["nan_count"]
+    for feature_info in result["numeric_features"].values()
+)
+
+print(f"所有 numeric features 的 nan_count 总和为: {total_numeric_nan_count}")
+
 # 保存为 JSON 文件
-with open("test_features_summary.json", "w", encoding="utf-8") as f:
+with open("features_summary.json", "w", encoding="utf-8") as f:
     json.dump(result, f, ensure_ascii=False, indent=4)
 
 print("结果已保存到 features_summary.json")
