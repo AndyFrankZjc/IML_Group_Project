@@ -1,0 +1,2 @@
+model_id,hidden_layers,dropout_rate,learning_rate,batch_size,best_val_auc
+1,"(256, 128, 64)",0.3,0.001,1024,0.7621622640449806

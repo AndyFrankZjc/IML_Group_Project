@@ -1,59 +1,88 @@
-# IML_Group_Project
+# Home Credit Neural Network - Using Processed Team Features
 
-数据集太大传不上来，建议下载原数据集后设置以下文件夹：
+This version is designed to use the processed CSV files created by the team.
+
+## Expected files
+
+Place these files into:
 
 ```text
-项目总文件夹
-├── raw_data文件夹           # 原数据集的10张csv
-├── processed_data文件夹     # 预处理后的csv存放地
-├── view_data文件夹          # 取出来csv前几行数据以供浏览
-├── feature_select.py        # 特征筛选
-├── data_process.py          # 数据预处理代码
-├── merge_features.py        # 多表连接
-├── make_csv.py              # 功能性代码
-└── count.py                 # 功能性代码
+data/processed/
 ```
 
-application_train / test.csv表处理完毕，选了46特征，one-hot encoding和aggregation后为68特征
-从installments_payments.csv和bureau.csv选了几个特征聚合后新增3个特征，现在共68 + 3 = 71特征
+Required baseline processed files:
 
-# 运行步骤：
+```text
+application_train_processed.csv
+application_test_processed.csv
+```
 
-1. 分别对application_train.csv和application_test.csv运行feature_select.py，生成application_train_selected_features.csv和application_test_selected_features.csv
+Required merged-feature processed files:
 
-# 由于训练集和测试集已经提前分好并且特征类别不一致的原因：
+```text
+application_train_processed_merge_features.csv
+application_test_processed_merge_features.csv
+```
 
-2. 对application_train_selected_features.csv和application_test_selected_features.csv运行data_process.py，在第3块：“3. 设置 missing indicator”时，注意是否注释掉“target_col = ["TARGET"]”； 在最后的elif n_unique > 5: 分支下，标注了处理训练集和测试集的代码块，需要进行互斥注释
+Note: if your test files have names such as `application_test_processed(1).csv`, rename them to:
 
-3. 得到最终处理后的application_train_processed.csv和application_test_processed.csv
+```text
+application_test_processed.csv
+application_test_processed_merge_features.csv
+```
 
+## Run application-only processed features
 
-# 文件说明：
+```bash
+python src/train_nn_processed.py --feature-set application
+```
 
-feature_select.py和data_process.py是处理数据用的，
+## Run processed features with merged historical features
 
-make_csv.py可以从大表中取出部分数据来快速观看，
+```bash
+python src/train_nn_processed.py --feature-set merged
+```
 
-count.py可以统计每个categorical特征中的category数 -> 每个category的样本数和概率，统计numeric特征中的NaN数(缺失率)
+## Run quick tuning
 
-# 对特征的处理：
+```bash
+python src/train_nn_processed.py --feature-set merged --tune
+```
 
-1. 筛选特征，去除重复行
+## Outputs
 
-2. 清洗特征中意义不明的类别
+```text
+outputs/metrics_processed_<feature_set>.json
+outputs/tuning_results_processed_<feature_set>.csv
+outputs/confusion_matrix_processed_<feature_set>.png
+outputs/training_auc_processed_<feature_set>.png
+outputs/training_loss_processed_<feature_set>.png
+outputs/nn_predictions_internal_test_processed_<feature_set>.csv
+outputs/kaggle_submission_nn_processed_<feature_set>.csv
+outputs/best_mlp_model_processed_<feature_set>.keras
+```
 
-3. 对缺失率 >= 15% 的特征设置MISSING_INDICATOR
+## What this version assumes
 
-4. 对EXT_SOURCE_1, EXT_SOURCE_2, EXT_SOURCE_3这三个特征做aggregation
+The team has already completed the main data processing steps, including:
 
-5. 构造了6个RATIO（比率）特征
+1. feature screening and duplicate removal
+2. cleaning ambiguous categorical values
+3. missing indicators for features with missing rate >= 15%
+4. aggregation of EXT_SOURCE_1, EXT_SOURCE_2, EXT_SOURCE_3
+5. six ratio features
+6. winsorization for outlier handling
+7. missing value imputation
+8. categorical encoding through one-hot encoding and frequency encoding
+9. merging additional dataset features
 
-6. 异常值处理winsorization
+Therefore, this neural network script does **not** repeat those feature engineering steps.
+It only performs neural-network-specific steps:
 
-7. 缺失值填补，categorical型用最高频率，numeric型用中位数
-
-8. categorical转numeric，类别少的one-hot encoding，多的frequency encoding，并将出现频率<2%的合并至稀有类中
-
-9. 整合多个数据集中的特征
-
-
+1. train / validation / internal test split
+2. feature alignment between train and official test
+3. median imputation as safety check
+4. standardisation
+5. class weighting
+6. MLP training and hyperparameter tuning
+7. evaluation and output generation
